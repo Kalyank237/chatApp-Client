@@ -25,7 +25,7 @@ const MessagesManagement = lazy(() =>
 );
 
 const App = () => {
-  const { user, loader } = useSelector((state) => state.auth);
+  const { user, loader, isAdmin } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
