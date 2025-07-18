@@ -6,6 +6,7 @@ import axios from "axios";
 import { server } from "./constants/config";
 import { useDispatch, useSelector } from "react-redux";
 import { userExists, userNotExists } from "./redux/reducers/auth";
+import { getAdmin } from "./redux/thunks/admin";
 import { Toaster } from "react-hot-toast";
 import { SocketProvider } from "./socket";
 
@@ -35,6 +36,15 @@ const App = () => {
       .catch((err) => dispatch(userNotExists()));
   }, [dispatch]);
 
+  useEffect(() => {
+  axios
+    .get(`${server}/api/v1/user/me`, { withCredentials: true })
+    .then(({ data }) => dispatch(userExists(data.user)))
+    .catch((err) => dispatch(userNotExists()));
+
+  dispatch(getAdmin()); // restore isAdmin from cookie
+}, [dispatch]);
+
   return loader ? (
     <LayoutLoader />
   ) : (
@@ -60,13 +70,47 @@ const App = () => {
                 <Login />
               </ProtectRoute>
             }
-          />
+            />
+            
+            <Route
+  path="/admin/dashboard"
+  element={
+    <ProtectRoute user={isAdmin} redirect="/admin">
+      <Dashboard />
+    </ProtectRoute>
+  }
+/>
+<Route
+  path="/admin/users"
+  element={
+    <ProtectRoute user={isAdmin} redirect="/admin">
+      <UserManagement />
+    </ProtectRoute>
+  }
+/>
+<Route
+  path="/admin/chats"
+  element={
+    <ProtectRoute user={isAdmin} redirect="/admin">
+      <ChatManagement />
+    </ProtectRoute>
+  }
+/>
+<Route
+  path="/admin/messages"
+  element={
+    <ProtectRoute user={isAdmin} redirect="/admin">
+      <MessagesManagement />
+    </ProtectRoute>
+  }
+/>
 
-          <Route path="/admin" element={<AdminLogin />} />
+
+          {/* <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/chats" element={<ChatManagement />} />
-          <Route path="/admin/messages" element={<MessagesManagement />} />
+          <Route path="/admin/messages" element={<MessagesManagement />} /> */}
 
           <Route path="*" element={<NotFound />} />
         </Routes>
